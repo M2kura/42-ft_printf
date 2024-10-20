@@ -12,25 +12,6 @@
 
 #include "ft_printf.h"
 
-// Specifiers:
-// c - Prints a single character.
-// s - Prints a string.
-// p - The void * pointer argument has to be printed in hexadecimal format.
-// d - Prints a decimal (base 10) number.
-// i - Prints an integer in base 10, same as %d.
-// u - Prints an unsigned decimal (base 10) number.
-// x - Prints a number in hexadecimal (base 16) lowercase format.
-// X - Prints a number in hexadecimal (base 16) uppercase format.
-// % - Prints a percent sign.
-//
-// Flags:
-// '-' - Left-justify within the given field width; Right justification is the default
-// '0' - Left-pads the number with zeroes (0) instead of spaces when padding is specified
-// '.' - Precision
-// '#' -
-// ' ' -
-// ''
-
 static void put_hex_uns(unsigned long n, char x, int hex, int chars) {
     if (hex) {
         char    *base;
@@ -54,7 +35,7 @@ static void put_hex_uns(unsigned long n, char x, int hex, int chars) {
 static void count_chars(int chars, va_list args, const char *str, int i) {
     if (str[i] == 'c' || str[i] == '%') {
         chars++;
-        va_arg(args, char);
+        va_arg(args, int);
     } else if (str[i] == 's')
         chars += ft_strlen(va_arg(args, char *));
     else if (str[i] == 'd' || str[i] == 'i')
@@ -69,7 +50,7 @@ static void count_chars(int chars, va_list args, const char *str, int i) {
 
 static void check_specifiers(const char *str, int i, va_list args, int chars) {
     if (str[i] == 'c')
-        ft_putchar_fd(va_arg(args, char), 0);
+        ft_putchar_fd(va_arg(args, int), 0);
     else if (str[i] == 's')
         ft_putstr_fd(va_arg(args, char *), 0);
     else if (str[i] == 'p') {

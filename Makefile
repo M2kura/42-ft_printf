@@ -12,16 +12,16 @@ LIBFT_PATH = ./libft
 
 LIBFT = $(LIBFT_PATH)/libft.a
 
-all: $(LIBFT) $(NAME)
+all: $(NAME)
 
 %.o: %.c
 	$(CC) $(FLAGS) -I. -o $@ -c $?
 
 $(NAME): $(OBJ)
-	ar rc $(NAME) $(OBJ) $(LIBFT)
+	$(MAKE) -C $(LIBFT_PATH)
+	mv libft/libft.a $(NAME)
+	ar rcs $(NAME) $(OBJ)
 
-$(LIBFT):
-	$(MAKE) -C $(LIBFT_PATH) all
 
 clean:
 	rm -f $(OBJ)
@@ -29,6 +29,6 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
-	$(MAKE) -C $(LIBFT_PATH) clean
+	$(MAKE) -C $(LIBFT_PATH) fclean
 
-re: fclean all	
+re: fclean all
