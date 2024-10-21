@@ -31,4 +31,7 @@ fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_PATH) fclean
 
+main: re
+	$(CC) $(FLAGS) main.c -L. -lftprintf -o main
+
 re: fclean all
