@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hteteria <hteteria@student.42.fr>          +#+  +:+       +#+        */
+/*   By: m2kura <m2kura@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 23:49:50 by hteteria          #+#    #+#             */
-/*   Updated: 2024/10/21 21:40:27 by hteteria         ###   ########.fr       */
+/*   Updated: 2024/10/22 12:41:29 by m2kura           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,27 +30,26 @@ static void	put_hex_uns(unsigned long n, char x, int hex, int *chars)
 	{
 		if (n >= 10)
 			put_hex_uns(n / 10, x, hex, chars);
-		ft_putchar_fd(n % 10 + '0', 1);
+		ft_putchar_fd((char)(n % 10) + '0', 1);
 	}
 	(*chars)++;
 }
 
-static void	count_chars(int *chars, va_list args, const char *str, int i)
+static int	count_chars(int *chars, va_list args, const char *str, int i)
 {
-	char	*itoa;
+	char	*arg;
 
-	if (str[i] == 'c' || str[i] == '%')
+	if (str[i] == 's')
 	{
-		(*chars)++;
-		va_arg(args, int);
+		arg = va_arg(args, char *);
+		if (arg)
+			(*chars) += (int)(ft_strlen(arg));
 	}
-	else if (str[i] == 's')
-		(*chars) += ft_strlen(va_arg(args, char *));
 	else if (str[i] == 'd' || str[i] == 'i')
 	{
-		itoa = ft_itoa(va_arg(args, int));
-		(*chars) += ft_strlen(itoa);
-		free(itoa);
+		arg = ft_itoa(va_arg(args, int));
+		(*chars) += (int)(ft_strlen(arg));
+		free(arg);
 	}
 	else if (str[i] == 'u' || str[i] == 'x' || str[i] == 'X')
 		va_arg(args, unsigned int);
@@ -58,6 +57,7 @@ static void	count_chars(int *chars, va_list args, const char *str, int i)
 		va_arg(args, void *);
 	else
 		(*chars)++;
+	return (1);
 }
 
 static int	check_null(va_list args, int *chars, int *i, const char *str)
@@ -74,12 +74,14 @@ static int	check_null(va_list args, int *chars, int *i, const char *str)
 		{
 			ft_putstr_fd("(nil)", 1);
 			(*chars) += 5;
+			va_end(args_cp);
 			return (0);
 		}
 		else if (addr == 0 && str[(*i)] == 's')
 		{
 			ft_putstr_fd("(null)", 1);
 			(*chars) += 6;
+			va_end(args_cp);
 			return (0);
 		}
 	}
@@ -92,7 +94,7 @@ static void	check_specifiers(const char *str, int *i, va_list args, int *chars)
 	if (check_null(args, chars, i, str))
 	{
 		if (str[(*i)] == 'c')
-			ft_putchar_fd(va_arg(args, int), 1);
+			ft_putchar_fd((char)va_arg(args, int), 1);
 		else if (str[(*i)] == 's')
 			ft_putstr_fd(va_arg(args, char *), 1);
 		else if (str[(*i)] == 'p')
@@ -120,19 +122,17 @@ int	ft_printf(const char *str, ...)
 	va_list	args_cp;
 
 	va_start(args, str);
-	va_copy(args_cp, args);
 	i = 0;
 	chars = 0;
 	while (str[i])
 	{
+		va_copy(args_cp, args);
 		if (str[i] != '%')
 			ft_putchar_fd(str[i], 1);
 		else
 			check_specifiers(str, &i, args, &chars);
-		count_chars(&chars, args_cp, str, i);
-		i++;
+		i += count_chars(&chars, args_cp, str, i);
 	}
 	va_end(args);
-	va_end(args_cp);
 	return (chars);
 }
