@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: m2kura <m2kura@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hteteria <hteteria@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 23:49:50 by hteteria          #+#    #+#             */
-/*   Updated: 2024/10/22 12:41:29 by m2kura           ###   ########.fr       */
+/*   Updated: 2024/10/24 18:24:46 by hteteria         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,21 +42,17 @@ static int	count_chars(int *chars, va_list args, const char *str, int i)
 	if (str[i] == 's')
 	{
 		arg = va_arg(args, char *);
-		if (arg)
-			(*chars) += (int)(ft_strlen(arg));
+		(*chars) += (int)(ft_strlen(arg));
 	}
+	else if (str[i] == 'c' || str[i] == '%')
+		(*chars)++;
 	else if (str[i] == 'd' || str[i] == 'i')
 	{
 		arg = ft_itoa(va_arg(args, int));
 		(*chars) += (int)(ft_strlen(arg));
 		free(arg);
 	}
-	else if (str[i] == 'u' || str[i] == 'x' || str[i] == 'X')
-		va_arg(args, unsigned int);
-	else if (str[i] == 'p')
-		va_arg(args, void *);
-	else
-		(*chars)++;
+	(*chars)--;
 	return (1);
 }
 
@@ -126,13 +122,18 @@ int	ft_printf(const char *str, ...)
 	chars = 0;
 	while (str[i])
 	{
-		va_copy(args_cp, args);
 		if (str[i] != '%')
 			ft_putchar_fd(str[i], 1);
 		else
+		{
+			va_copy(args_cp, args);
 			check_specifiers(str, &i, args, &chars);
-		i += count_chars(&chars, args_cp, str, i);
+			count_chars(&chars, args_cp, str, i);
+		}
+		i++;
+		chars++;
 	}
 	va_end(args);
+	va_end(args_cp);
 	return (chars);
 }
